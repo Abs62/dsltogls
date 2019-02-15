@@ -11,8 +11,7 @@ OBJECTS_DIR = build
 TEMPLATE = app
 
 INCLUDEPATH += .
-LIBS += -liconv \
-        -lz
+LIBS += -lz
 
 SOURCES += \
     main.cc \
@@ -70,6 +69,7 @@ win32 {
 
     INCLUDEPATH += winlibs/include
 
+    LIBS += -liconv
     LIBS += -L$${PWD}/winlibs/lib
 
     DEFINES += UNICODE

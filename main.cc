@@ -1,10 +1,15 @@
+#include <QVector>
+
+#ifdef Q_OS_WIN32
 #include <windows.h>
+#else
+#include <limits.h>
+#endif
+
 #include <string.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <string>
-
-#include <QVector>
 
 #include "folding.hh"
 #include "utf8.hh"
@@ -13,6 +18,7 @@
 
 using std::string;
 
+#ifdef Q_OS_WIN32
 int main()
 {
   int num;
@@ -75,14 +81,71 @@ int main()
     }
   }
 
-  DslDictionary dict;
-
   FILE * outFile = _wfopen( glsName, L"wt" );
   if( outFile == 0 )
   {
     printf( "\nCan't open output file\n" );
     return -1;
   }
+#else
+int main( int argc, char **argv )
+{
+char uAbbrName[ PATH_MAX ];
+char *uName, *glsName;
+
+  if( argc > 2 )
+  {
+    uName = argv[ 1 ];
+    glsName = argv[ 2 ];
+
+    if( strcmp( uName, glsName ) == 0 )
+    {
+      printf( "Names must be different\n" );
+      return -1;
+    }
+  }
+  else
+  {
+    printf( "Usage: dsltogls dsl_file gls_file\n" );
+    return -1;
+  }
+
+// Check for abbreviations file
+  uAbbrName[ 0 ] = 0;
+
+  int n = strlen( uName );
+  if( strcmp( uName + n - 4, ".dsl" ) == 0 )
+  {
+    strncpy( uAbbrName, uName, n - 4 );
+    uAbbrName[ n - 4 ] = 0;
+  }
+  else
+  if( strcmp( uName + n - 7, ".dsl.dz" ) == 0 )
+  {
+    strncpy( uAbbrName, uName, n - 7 );
+    uAbbrName[ n - 7 ] = 0;
+  }
+  if( uAbbrName[ 0 ] )
+  {
+    strncat( uAbbrName, "_abrv.dsl", PATH_MAX );
+    if( access( uAbbrName, 0 ) != 0 )
+    {
+      strncat( uAbbrName, ".dz", PATH_MAX );
+      if( access( uAbbrName, 0 ) != 0 )
+      {
+        uAbbrName[ 0 ] = 0;
+      }
+    }
+  }
+
+  FILE * outFile = fopen( glsName, "wt" );
+  if( outFile == 0 )
+  {
+    printf( "\nCan't open output file\n" );
+    return -1;
+  }
+#endif
+  DslDictionary dict;
 
   try
   {
