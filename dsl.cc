@@ -12,6 +12,7 @@
 #include "wstring_qt.hh"
 #include "gddebug.hh"
 #include "fsencoding.hh"
+#include <wctype.h>
 
 #include <QTextStream>
 #include <QDir>
